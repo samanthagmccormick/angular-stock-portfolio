@@ -1,0 +1,23 @@
+{
+  "name": "FrontEndTest",
+  "version": "0.0.0",
+  "description": "Front-end web dev assignment for SolidFire",
+  "main": "app.js",
+  "scripts": {
+    "unitTest": "./node_modules/.bin/jasmine-node ./test/unit --verbose",
+    "e2eTest": "protractor protractor.config.js --verbose",
+    "startDev": "node server.dev.js",
+    "startProd": "node server.prod.js",
+    "startMyMarket": "node server.dev.js tech rich"
+  },
+  "dependencies": {
+    "angular": "^1.5.6",
+    "c3": "0.4.11-rc4",
+    "d3": "~3.5.0",
+    "express": "~3.5.0"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5",
+    "protractor": "^2.5.1"
+  }
+}
