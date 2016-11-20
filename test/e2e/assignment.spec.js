@@ -1,4 +1,6 @@
-'use strict';
+(function () {
+   'use strict';
+}());
 
 describe('Stock Market App', function() {
   describe('Investor Dashboard', function() {

@@ -1,4 +1,6 @@
-'use strict';
+(function () {
+   'use strict';
+}());
 
 var express = require('express');
 var app = express();
@@ -14,44 +16,61 @@ var investorGroup = process.argv[3];
 
 /* Pre-defined stock market configurations */
 var createStocks = function() {
-  var ntap = new Stock('NTAP', 26.31, 4000, 1.0017, 6000, 1.03);
-  var goog = new Stock('GOOG', 726.65, 5000, 0.9995, 5000, 0.46);
+  // Stock(symbol, price, quantity, growthRate, changeInterval, volatilityPercent)
+  var ntap = new Stock('NTAP', 26.31, 4000, 1.0017, 6000, 1.03); // NetApp
+  var goog = new Stock('GOOG', 726.65, 5000, 0.9995, 5000, 0.46); // Google (obviiii)
 
+  // stockType is process.argv[2]
   switch(stockType) {
     case('tech'):
       console.log('Loading Tech Stocks into the market...');
       return [ntap, goog];
     default:
-      return [ntap];
+      return [ntap]; // if no matches return NTAP
   }
 };
 
 var createInvestors = function() {
+  // Investor(investorId, name, capital)
   var user = new Investor(1, 'User', 5);
   var dan = new Investor(2, 'Dan', 150000);
   var rich = new Investor(3, 'Rich', 475000);
 
+  // investorGroup is process.argv[3]
   switch(investorGroup) {
     case('rich'):
       console.log('Placing Rich Investors into the market...');
-      return [dan, rich];
+      return [dan, rich]; // Dan is already in the market?
     default:
-      return [user];
+      return [user]; // if no matches return USER
   }
 };
 
+
+
+
+// Initialize the app. (create stocks, create investors, create market with these stocks and investors)
 var stocks = createStocks();
 var investors = createInvestors();
+// Market(stocks, investors)
 var myMarket = new Market(stocks, investors);
 
 myMarket.open();
 
+
+
+
 /* Example routes - add your own routes to interact with your stock market */
+
+// on visit of localhost:3000/stocks
 app.get('/stocks', function (req, res) {
+  // send the stocks array data to the client side, for visualization with angular
   res.send(myMarket.stocks);
 });
 
+// on get of localhost:3000/active-investor
 app.get('/active-investor', function (req, res) {
+  // send the first investor data to the client side, for visualization with angular
   res.send(myMarket.investors[0]);
 });
 
