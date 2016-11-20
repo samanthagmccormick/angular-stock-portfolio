@@ -4,6 +4,9 @@ var gulp = require('gulp');
 var jshint = require('gulp-jshint');
 var sass = require('gulp-sass');
 var connect = require('gulp-connect');
+// allows you to set up tasks that run bash commands
+var exec = require('gulp-exec');
+
 
 gulp.task('test:e2e', function() {
   //Run end to end test suite
@@ -20,9 +23,14 @@ gulp.task('build', function() {
 gulp.task('start:dev', function() {
   //Configure your stock market backend via command line params and start your dev server
 
-  // TODO
-  var stockType = process.argv[2];
-  var investorGroup = process.argv[3];
+  return gulp.src('./**/**')
+    .pipe(exec('node server.dev.js'));
+});
+
+// FIXME
+gulp.task('start:market', function() {
+  return gulp.src('./**/**')
+    .pipe(exec('node server.dev.js tech rich'));
 
 });
 
@@ -33,7 +41,11 @@ gulp.task('start:prod', function() {
 /* Additional tasks */
 
 gulp.task('jshint', function() {
-  gulp.src(['./**/*.js'])
+  gulp.src([
+    './**/*.js',
+    '!./bower_components/**/*.js',
+    '!./node_modules/**/*.js'
+    ])
     // pass each js file one by one into...
     .pipe(jshint())
     // ...the jshint default reporter
@@ -46,10 +58,10 @@ gulp.task('sass', function() {
     // pass each scss file one by one into...
     .pipe(sass())
     // ...the destination file
-    .pipe(gulp.dest('./src/styles/css'))
-    .pipe(connect.reload());
+    .pipe(gulp.dest('./src/styles/css'));
 });
 
+// THIS NO WORK-Y
 // livereload server
 // gulp.task('connect', function() {
 //   connect.server({
@@ -60,7 +72,7 @@ gulp.task('sass', function() {
 // watch JS and SCSS files for changes
 gulp.task('watch', function() {
   gulp.watch('**/*.scss', ['sass']);
-  gulp.watch('./**/*.js', "!./node_modules/", ['jshint']);
+  gulp.watch('./**/*.js', ['jshint']);
 });
 
 gulp.task('default', [
@@ -72,3 +84,4 @@ gulp.task('default', [
   // 'connect',
   'watch'
 ]);
+

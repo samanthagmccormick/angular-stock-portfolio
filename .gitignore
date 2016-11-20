@@ -1,3 +1,5 @@
 node_modules
 *.log
 src/styles/css/base.css
+bower_components
+src/styles/.DS_Store
