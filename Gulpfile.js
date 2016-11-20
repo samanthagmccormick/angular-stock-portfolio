@@ -2,6 +2,8 @@
 
 var gulp = require('gulp');
 var jshint = require('gulp-jshint');
+var sass = require('gulp-sass');
+var connect = require('gulp-connect');
 
 gulp.task('test:e2e', function() {
   //Run end to end test suite
@@ -32,8 +34,41 @@ gulp.task('start:prod', function() {
 
 gulp.task('jshint', function() {
   gulp.src(['./**/*.js'])
+    // pass each js file one by one into...
     .pipe(jshint())
+    // ...the jshint default reporter
     .pipe(jshint.reporter('default'));
 });
 
-gulp.task('default', ['jshint', 'test:e2e', 'test:unit', 'build']);
+gulp.task('sass', function() {
+  // look recursively inside sass directory for .scss files
+  gulp.src('./src/styles/sass/master.scss')
+    // pass each scss file one by one into...
+    .pipe(sass())
+    // ...the destination file
+    .pipe(gulp.dest('./src/styles/css/'))
+    .pipe(connect.reload());
+});
+
+// livereload server
+gulp.task('connect', function() {
+  connect.server({
+    livereload: true
+  });
+});
+
+// watch JS and SCSS files for changes
+gulp.task('watch', function() {
+  gulp.watch('./src/styles/sass/*.scss', ['sass']);
+  gulp.watch('./**/*.js', ['jshint']);
+});
+
+gulp.task('default', [
+  'jshint',
+  'sass',
+  'test:e2e',
+  'test:unit',
+  'build',
+  'connect',
+  'watch'
+]);
