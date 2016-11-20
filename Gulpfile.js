@@ -42,25 +42,25 @@ gulp.task('jshint', function() {
 
 gulp.task('sass', function() {
   // look recursively inside sass directory for .scss files
-  gulp.src('./src/styles/sass/master.scss')
+  gulp.src('./src/styles/sass/*.scss')
     // pass each scss file one by one into...
     .pipe(sass())
     // ...the destination file
-    .pipe(gulp.dest('./src/styles/css/'))
+    .pipe(gulp.dest('./src/styles/css'))
     .pipe(connect.reload());
 });
 
 // livereload server
-gulp.task('connect', function() {
-  connect.server({
-    livereload: true
-  });
-});
+// gulp.task('connect', function() {
+//   connect.server({
+//     livereload: true
+//   });
+// });
 
 // watch JS and SCSS files for changes
 gulp.task('watch', function() {
-  gulp.watch('./src/styles/sass/*.scss', ['sass']);
-  gulp.watch('./**/*.js', ['jshint']);
+  gulp.watch('**/*.scss', ['sass']);
+  gulp.watch('./**/*.js', "!./node_modules/", ['jshint']);
 });
 
 gulp.task('default', [
@@ -69,6 +69,6 @@ gulp.task('default', [
   'test:e2e',
   'test:unit',
   'build',
-  'connect',
+  // 'connect',
   'watch'
 ]);
