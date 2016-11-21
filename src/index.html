@@ -1,25 +1,88 @@
 <!doctype html>
 <html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<meta http-equiv="Cache-Control" content="no-cache" />
-		<title>Stock Market</title>
-        <link rel="stylesheet" href="c3/c3.min.css" />
-        <!-- SASS file -->
-        <link rel="stylesheet" href="/styles/css/base.css" type="text/css" media="screen">
-        <script src="angular/angular.min.js"></script>
-        <script src="d3/d3.min.js"></script>
-        <script src="c3/c3.min.js"></script>
-		<script src="app.js" type="text/javascript"></script>
-	</head>
-	<body>
-		<div ng-app="app" ng-controller="AppCtrl as ctrl">
-            <h1>Hello {{ctrl.myInvestor.name}}</h1>
-            <p>{{ctrl.myStock.symbol}}</p>
-            <p>{{ctrl.myStock.price | currency}}</p>
-            <p>{{ctrl.myStock.quantity}}</p>
-            <a ng-click="ctrl.refresh()">Refresh</a>
-            <div id="stock-chart"></div>
-		</div>
-	</body>
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <title>Stock Market</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="c3/c3.min.css" />
+    <link rel="stylesheet" href="/styles/css/base.css" type="text/css" media="screen">
+
+    <!-- JS (TODO: compile/minify into 1 file) -->
+    <script src="angular/angular.min.js"></script>
+    <script src="d3/d3.min.js"></script>
+    <script src="c3/c3.min.js"></script>
+    <!--     <script src="../bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.2/angular-ui-router.js"></script>
+
+
+    <!-- JS files-->
+    <script src="app.js" type="text/javascript"></script>
+  </head>
+
+  <body ng-app="app">
+
+    <menu>
+        <a href="#/market">Market</a>
+        <a href="#/investor">Investor</a>
+        <a href="#/manager">Manager</a>
+    </menu>
+
+    <!-- this is where the route below goes-->
+    <ui-view></ui-view>
+
+    <!-- Market route -->
+    <script type="text/ng-template" id="/market.html">
+
+        <div ng-repeat="myStock in stocks">
+            {{myStock.symbol}}
+            {{myStock.price | currency}}
+            {{myStock.quantity}}
+            {{myStock.timestamps}}
+            <a ng-click="refresh(stock, $index)">Refresh</a>
+        </div>
+
+        <div id="stock-chart">chart!</div>
+
+    </script>
+
+
+    <!-- Investor route -->
+    <script type="text/ng-template" id="/investor.html">
+        <h1>Hello {{myInvestor.name}}.</h1>
+        <p>You have {{myInvestor.capital | currency}} remaining to <strong>make it rain.</strong></p>
+
+        <h3>Get a Quote</h3>
+        <div ng-repeat="stock in stocks">
+            <form ng-submit="getQuote()">
+                <input type="text" ng-model="stock.symbol" placeholder="symbol">
+                <input type="text" ng-model="stock.price" placeholder="price">
+               <input type="text" ng-model="quantity" placeholder="quantity" ng-change="changeQuote(quantity, $index)">
+            </form>
+        </div>
+        <div>Total: {{total}}</div>
+
+
+        <div ng-repeat="transaction in transactions">
+            {{transaction}}
+        </div>
+
+
+
+
+    </script>
+
+
+    <!-- Manager route -->
+    <script type="text/ng-template" id="/manager.html">
+        {{test}}
+    </script>
+
+
+
+
+  </body>
+
 </html>
