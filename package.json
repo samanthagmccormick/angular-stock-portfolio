@@ -17,6 +17,8 @@
     "express": "~3.5.0"
   },
   "devDependencies": {
+    "angular-ui-router": "^0.3.2",
+    "bootstrap": "^3.3.7",
     "bower": "^1.8.0",
     "gulp": "^3.9.1",
     "gulp-connect": "^5.0.0",
@@ -26,7 +28,9 @@
     "gulp-sass": "^2.3.2",
     "gulp-watch": "^4.3.11",
     "jasmine-node": "^1.14.5",
+    "jquery": "^3.1.1",
     "jshint": "^2.9.4",
+    "ng-polymer-elements": "^0.2.0",
     "protractor": "^2.5.1",
     "webdriver-manager": "^10.2.8"
   }
