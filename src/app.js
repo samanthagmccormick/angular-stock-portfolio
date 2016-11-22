@@ -54,6 +54,8 @@ app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.refresh = function(stock, index) {
       $scope.index = index;
 
+      console.log("refresh");
+
       // on success of GET of stocks
       $http.get('/stocks').success(function(stocks) {
 
@@ -107,7 +109,6 @@ app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.loadStocks();
   }]) // end MarketCtrl
 
-
 app.controller('InvestorCtrl', [
     '$scope',
     '$http',
@@ -152,16 +153,10 @@ app.controller('InvestorCtrl', [
         });
       }
 
-      $scope.getQuote = function(quantity, index) {
+      $scope.getQuote = function(index) {
         $scope.index = index;
-        $scope.quoteId;
 
         console.log($scope.index);
-
-        var regExp = new RegExp(/^\d+(?:\.\d{1,2})?$/);
-        if (quantity === '' || quantity <= 0 || !regExp.test(quantity)) {
-          return;
-        }
 
         // get active quoteId of stock
         $http.get('/quote', {
@@ -170,11 +165,21 @@ app.controller('InvestorCtrl', [
             }
           })
           .success(function(response) {
-            $scope.quoteId = response;
-          });
 
-        // refresh the stocks because there is now updated quotes
-        $scope.loadStocks();
+            $scope.quoteId = parseInt(response);
+
+            // Refresh stocks (to get latest quotes)
+            $http.get('/stocks').success(function(response) {
+
+              $scope.stocks = response;
+
+              console.log("stocks refreshed");
+
+              console.log($scope.stocks[$scope.index].activeQuotes);
+
+            });
+
+          });
 
       }
 
@@ -194,8 +199,8 @@ app.controller('InvestorCtrl', [
           return;
         }
 
-        // check if quantity is valid
-        if (quantity === '' || quantity === undefined || quantity < 0) {
+        var regExp = new RegExp(/^\d+(?:\.\d{1,2})?$/);
+        if (quantity === '' || quantity <= 0) {
           $scope.errorMessage("quantity");
           return;
         }
