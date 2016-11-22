@@ -62,8 +62,8 @@
       <div ng-repeat="stock in stocks">
         <form>
           <span>{{stock.symbol}}</span>
-          <input type="text" ng-model="quantity" placeholder="quantity" ng-change="getQuote(quantity, $index)">
-          <span>Quote: {{stock.quote | currency}}</span>
+          <input type="text" ng-model="quantity" placeholder="quantity" ng-change="getQuote(quantity, $index)"></input>
+          <span>Quote: {{stock.activeQuotes[quoteId] | currency}}</span>
         </form>
       </div>
 
@@ -77,16 +77,9 @@
       <div class="errorMessage">{{errorMessage}}</div>
 
 
-      <div ng-repeat="quote in quotes | filter:timestamp">
-        {{quote.symbol}} {{quote.quote}}
-      </div>
-
-
       <div ng-repeat="transaction in transactions">
         {{transaction}}
       </div>
-
-      <div>Latest Quote: {{latestQuote}}</div>
 
 
 

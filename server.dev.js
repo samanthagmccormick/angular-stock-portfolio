@@ -18,7 +18,7 @@ var investorGroup = process.argv[3];
 var createStocks = function() {
   // Stock(symbol, price, quantity, growthRate, changeInterval, volatilityPercent)
   var ntap = new Stock('NTAP', 26.31, 4000, 1.0017, 6000, 1.03); // NetApp
-  var goog = new Stock('GOOG', 726.65, 5000, 0.9995, 5000, 0.46); // Google (obviiii)
+  var goog = new Stock('GOOG', 726.65, 5000, 0.9995, 5000, 0.46); // Google
 
   // stockType is process.argv[2]
   switch(stockType) {
@@ -57,6 +57,7 @@ var myMarket = new Market(stocks, investors);
 
 myMarket.open();
 
+console.log(stocks[0].quote());
 
 
 
@@ -73,6 +74,35 @@ app.get('/active-investor', function (req, res) {
   // send the first investor data to the client side, for visualization with angular
   res.send(myMarket.investors[0]);
 });
+
+app.get('/marketStatus', function(req, res) {
+  res.send(myMarket.isOpen);
+});
+
+app.get('/quote', function(req, res, next) {
+
+  var symbolIndex = req.query.symbolIndex;
+
+  console.log(stocks[symbolIndex].quote());
+
+  res.send(stocks[symbolIndex].quote().toString());
+});
+
+// Market.prototype.buy = function(investorId, symbol, quoteId, quantity) {
+app.get('/buy', function(req, res, next) {
+
+  var investorId = req.query.investorId;
+  var symbol = req.query.symbol;
+  var quoteId = req.query.quoteId;
+  var quantity = req.query.quantity;
+
+  myMarket.buy(investorId, symbol, quoteId, quantity);
+
+  res.send('APP.GET completeddddd');
+
+});
+
+
 
 /* Starting the Express.js server instance */
 app.use(express.static('src'));

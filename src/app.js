@@ -154,72 +154,60 @@ app.controller('InvestorCtrl', [
 
       $scope.getQuote = function(quantity, index) {
         $scope.index = index;
+        $scope.quoteId;
+
+        console.log($scope.index);
 
         var regExp = new RegExp(/^\d+(?:\.\d{1,2})?$/);
         if (quantity === '' || quantity <= 0 || !regExp.test(quantity)) {
           return;
         }
-        // get current price of stock
-        $http.get('/stocks').success(function(stocks) {
 
-          // get current price * quantity = QUOTE for this stock
-          $scope.stocks[$scope.index].quote = stocks[$scope.index].price * quantity;
-
-          $scope.quotes.push({
-            timestamp: Date.now(),
-            symbol: $scope.stocks[$scope.index].symbol,
-            quote: $scope.stocks[$scope.index].quote
+        // get active quoteId of stock
+        $http.get('/quote', {
+            params: {
+              symbolIndex: $scope.index
+            }
           })
+          .success(function(response) {
+            $scope.quoteId = response;
+          });
 
-          console.log($scope.quotes);
-
-        });
+        // refresh the stocks because there is now updated quotes
+        $scope.loadStocks();
 
       }
 
 
-      $scope.buyStock = function(symbol, amount) {
-        $scope.latestQuote = 0;
+      $scope.buyStock = function(symbol, quantity) {
+        console.log($scope.stocks);
 
-        var symbolIndex = $filter('filter')($scope.stocks, { symbol: symbol })[0];
+        console.log('buyStock quantity: ' + quantity);
 
-        console.log(symbolIndex);
+        var stock = $filter('filter')($scope.stocks, {
+          symbol: symbol
+        })[0];
 
         // check if symbol is valid
-        if (symbol === '' || symbol === undefined || symbolIndex === undefined) {
+        if (symbol === '' || symbol === undefined || stock === undefined) {
           $scope.errorMessage("symbol");
           return;
         }
 
-        // check if amount is valid
-        if (amount === '' || amount === undefined || amount < 0) {
-          $scope.errorMessage("amount");
+        // check if quantity is valid
+        if (quantity === '' || quantity === undefined || quantity < 0) {
+          $scope.errorMessage("quantity");
           return;
         }
 
-        // Now get the latest quote for this symbol
-        var quotesBySymbol;
-        var latestSymbolQuote;
-        if ($scope.quotes.length > 0) {
-          // filter thru quotes for this symbol
-          quotesBySymbol = _.filter($scope.quotes, function(quote) { return quote.symbol === symbol; });
+        // calculate total of transaction using active quote
+        var transactionTotal = stock.activeQuotes[$scope.quoteId] * quantity;
 
-          // get the latest quote for this symbol
-          latestSymbolQuote = _.max(quotesBySymbol, function(quote) { return quote.timestamp });
-
-          $scope.latestQuote = latestSymbolQuote.quote;
-
-        } else {
-          // else get a quote for this symbol
-          $scope.latestQuote = $scope.getQuote(quantity, symbolIndex);
-        }
-
-        // calculate total amount of transaction using that quote
-        var transactionTotal = $scope.latestQuote * amount;
+        console.log(transactionTotal);
 
         // check if total $$ exceeds the investor's capital
         if (transactionTotal > $scope.myInvestor.capital) {
-          $scope.errorMessage("capital")
+          $scope.errorMessage("capital");
           return;
         }
 
@@ -227,13 +215,13 @@ app.controller('InvestorCtrl', [
 
         // if the market is open, buy stock!
         if (marketIsOpen) {
-          // Buy stock! (use Market function)
-          $http.get('/market', {
+          // Buy stock! (use Market.buy() function)
+          $http.get('/buy', {
               params: {
                 investorId: $scope.myInvestor.investorId,
                 symbol: symbol,
-                quoteId: latestSymbolQuote.timestamp,
-                quantity: amount
+                quoteId: $scope.quoteId,
+                quantity: quantity
               }
             })
             .success(function(response) {
@@ -244,6 +232,10 @@ app.controller('InvestorCtrl', [
         } else {
           $scope.errorMessage("closed");
         }
+
+        // refresh stocks because quantity is now updated
+        $scope.loadStocks();
+
       }
 
       // TODO move to view (should not be in controller)
@@ -252,7 +244,7 @@ app.controller('InvestorCtrl', [
 
         switch (item) {
           case 'symbol':
-          case 'amount':
+          case 'quantity':
             message = 'Sorry, you did not enter a valid ' + item + '. Please try again.';
             break;
           case 'capital':
