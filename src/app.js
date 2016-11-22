@@ -2,7 +2,12 @@
   'use strict';
 }());
 
-var app = angular.module('app', ['ui.router', 'ng-polymer-elements']);
+var underscore = angular.module('underscore', []);
+underscore.factory('_', function() {
+  return window._; //Underscore should be loaded on the page
+});
+
+var app = angular.module('app', ['ui.router', 'underscore']);
 
 // Internal routing
 app.config([
@@ -34,17 +39,6 @@ app.config([
     $urlRouterProvider.otherwise('market');
   }
 ]);
-
-
-// creating a factory to store data from controller, better for testing, passing to other controllers, etc.
-app.factory('total', [function() {
-  var o = {
-      total: 0
-    }
-    // returning another variable that CONTAINS posts allows us to store more
-    // data in this factory in the future
-  return o;
-}]);
 
 // on load of webpage, load MarketCtrl
 app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
@@ -118,9 +112,10 @@ app.controller('InvestorCtrl', [
     '$scope',
     '$http',
     '$filter',
-    'total', // inject "total" factory to use across controllers
-    function($scope, $http, $filter, total) {
-      $scope.total = total.total;
+    '_', // underscore
+    function($scope, $http, $filter, _) {
+      $scope.quotes = [];
+      $scope.count = 0;
 
       // check if market is open
       var marketIsOpen;
@@ -141,7 +136,7 @@ app.controller('InvestorCtrl', [
         // on success of GET of investors[0] endpoint
         $http.get('/active-investor').success(function(response) {
           console.log('investor...');
-          console.log(response);
+          // console.log(response);
 
           $scope.myInvestor = response;
         });
@@ -151,41 +146,47 @@ app.controller('InvestorCtrl', [
         // on success of GET of investors[0] endpoint
         $http.get('/stocks').success(function(response) {
           console.log('stocks...');
-          console.log(response);
+          // console.log(response);
 
           $scope.stocks = response;
         });
       }
 
-      $scope.changeQuote = function(quantity, index) {
+      $scope.getQuote = function(quantity, index) {
         $scope.index = index;
 
-        // price * quantity = subtotal
-        $scope.subtotal = $scope.stocks[$scope.index].price * quantity;;
+        var regExp = new RegExp(/^\d+(?:\.\d{1,2})?$/);
+        if (quantity === '' || quantity <= 0 || !regExp.test(quantity)) {
+          return;
+        }
+        // get current price of stock
+        $http.get('/stocks').success(function(stocks) {
 
-        // pass subtotal to grandTotal()
-        $scope.grandTotal($scope.subtotal);
+          // get current price * quantity = QUOTE for this stock
+          $scope.stocks[$scope.index].quote = stocks[$scope.index].price * quantity;
 
-      }
+          $scope.quotes.push({
+            timestamp: Date.now(),
+            symbol: $scope.stocks[$scope.index].symbol,
+            quote: $scope.stocks[$scope.index].quote
+          })
 
-      // FIXME: it is keeping a running total, need to store it locally
-      $scope.grandTotal = function(total) {
-        $scope.total += total;
+          console.log($scope.quotes);
 
-        console.log("grandTotal");
-      }
-
-      $scope.getQuote = function() {
-        $http.get('stocks').success(function(response) {
-          console.log(response);
         });
+
       }
+
 
       $scope.buyStock = function(symbol, amount) {
+        $scope.latestQuote = 0;
+
+        var symbolIndex = $filter('filter')($scope.stocks, { symbol: symbol })[0];
+
+        console.log(symbolIndex);
+
         // check if symbol is valid
-        if (symbol === '' || symbol === undefined || $filter('filter')($scope.stocks, {
-            symbol: symbol
-          })[0] === undefined) {
+        if (symbol === '' || symbol === undefined || symbolIndex === undefined) {
           $scope.errorMessage("symbol");
           return;
         }
@@ -196,13 +197,25 @@ app.controller('InvestorCtrl', [
           return;
         }
 
-        // search for symbol in stocks array
-        var stock = $filter('filter')($scope.stocks, {
-          symbol: symbol
-        })[0];
+        // Now get the latest quote for this symbol
+        var quotesBySymbol;
+        var latestSymbolQuote;
+        if ($scope.quotes.length > 0) {
+          // filter thru quotes for this symbol
+          quotesBySymbol = _.filter($scope.quotes, function(quote) { return quote.symbol === symbol; });
 
-        // calculate total $$
-        var transactionTotal = stock.price * amount;
+          // get the latest quote for this symbol
+          latestSymbolQuote = _.max(quotesBySymbol, function(quote) { return quote.timestamp });
+
+          $scope.latestQuote = latestSymbolQuote.quote;
+
+        } else {
+          // else get a quote for this symbol
+          $scope.latestQuote = $scope.getQuote(quantity, symbolIndex);
+        }
+
+        // calculate total amount of transaction using that quote
+        var transactionTotal = $scope.latestQuote * amount;
 
         // check if total $$ exceeds the investor's capital
         if (transactionTotal > $scope.myInvestor.capital) {
@@ -219,7 +232,7 @@ app.controller('InvestorCtrl', [
               params: {
                 investorId: $scope.myInvestor.investorId,
                 symbol: symbol,
-                quoteId: 1, // TODO create real ID
+                quoteId: latestSymbolQuote.timestamp,
                 quantity: amount
               }
             })
@@ -251,7 +264,6 @@ app.controller('InvestorCtrl', [
           default:
             message = 'Oops, application error...no message found.';
         }
-        console.log(message);
 
         $scope.errorMessage = message;
       }

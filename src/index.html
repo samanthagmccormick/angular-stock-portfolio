@@ -13,13 +13,13 @@
 
     <!-- JS (TODO: compile/minify into 1 file) -->
     <script src="jquery/dist/jquery.min.js"></script>
+    <script src="underscore/underscore.js"></script>
     <script src="angular/angular.min.js"></script>
     <script src="angular-ui-router/release/angular-ui-router.min.js"></script>
     <script src="d3/d3.min.js"></script>
     <script src="c3/c3.min.js"></script>
     <script src="ng-polymer-elements/ng-polymer-elements.min.js"></script>
     <script src="bootstrap/dist/js/bootstrap.min.js"></script>
-
 
     <!-- JS files-->
     <script src="app.js" type="text/javascript"></script>
@@ -62,24 +62,31 @@
       <div ng-repeat="stock in stocks">
         <form>
           <span>{{stock.symbol}}</span>
-          <span>{{stock.price | currency}}</span>
-          <input type="text" ng-model="quantity" placeholder="quantity" ng-change="changeQuote(quantity, $index)">
+          <input type="text" ng-model="quantity" placeholder="quantity" ng-change="getQuote(quantity, $index)">
+          <span>Quote: {{stock.quote | currency}}</span>
         </form>
       </div>
-      <div>Total: {{total | currency}}</div>
 
       <h3>Buy a Stock</h3>
+      <h5>Uses your current quote above</h5>
       <form ng-submit="buyStock(symbol, amount)">
         <input type="text" ng-model="symbol" placeholder="Stock ticker"></input>
-        <input type="text" ng-model="amount" placeholder="quantity"></input>
+        <input type="number" ng-model="amount" placeholder="quantity"></input>
         <button type="submit">Buy</button>
       </form>
       <div class="errorMessage">{{errorMessage}}</div>
 
 
+      <div ng-repeat="quote in quotes | filter:timestamp">
+        {{quote.symbol}} {{quote.quote}}
+      </div>
+
+
       <div ng-repeat="transaction in transactions">
         {{transaction}}
       </div>
+
+      <div>Latest Quote: {{latestQuote}}</div>
 
 
 
