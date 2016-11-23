@@ -6,7 +6,8 @@ var sass = require('gulp-sass');
 var connect = require('gulp-connect');
 // allows you to set up tasks that run bash commands
 var exec = require('gulp-exec');
-var jasmine = require('gulp-jasmine');
+var karma = require('karma').server; // to include angular in jasmine tests
+
 
 
 gulp.task('test:e2e', function() {
@@ -76,7 +77,6 @@ gulp.task('jasmine', function() {
 });
 
 gulp.task('default', [
-  'jasmine',
   'jshint',
   'sass',
   'test:e2e',

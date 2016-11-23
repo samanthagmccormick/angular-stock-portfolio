@@ -34,7 +34,6 @@ app.config([
       controller: 'ManagerCtrl'
     });
 
-
     // Handle incorrectly entered routes, i.e. redirect to "home" state
     $urlRouterProvider.otherwise('market');
   }
@@ -192,16 +191,10 @@ app.controller('InvestorCtrl', [
           $scope.stocks = response;
         });
 
-        console.log('buyStock quantity: ' + quantity);
-
         // Find the right stock based on symbol
-        var stock = $filter('filter')($scope.stocks, {
-          symbol: symbol
-        })[0];
+        var stock = $scope.getStockBySymbol();
 
-        // validate symbol / stock
-        if (symbol === '' || symbol === undefined || stock === undefined) {
-          $scope.errorMessage("symbol");
+        if (!stock.isSymbolValid(symbol)) {
           return;
         }
 
@@ -263,6 +256,21 @@ app.controller('InvestorCtrl', [
         $scope.loadStocks();
 
       }
+
+      // TODO: make into factory
+      $scope.getStockBySymbol = function(symbol) {
+        return $filter('filter')($scope.stocks, {
+          symbol: symbol
+        })[0];
+      }
+
+      // $scope.isSymbolValid = function(symbol) {
+      //   // validate symbol
+      //   if (symbol === '' || symbol === undefined || $scope.getStockBySymbol(symbol) === undefined) {
+      //     $scope.errorMessage("symbol");
+      //   }
+      //   return;
+      // }
 
       // TODO move to view (should not be in controller)
       $scope.errorMessage = function(item) {
