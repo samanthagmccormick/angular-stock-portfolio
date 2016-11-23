@@ -1,11 +1,12 @@
 // READ: https://www.sitepoint.com/introduction-gulp-js/
-
+// var angular = require('angular');
 var gulp = require('gulp');
 var jshint = require('gulp-jshint');
 var sass = require('gulp-sass');
 var connect = require('gulp-connect');
 // allows you to set up tasks that run bash commands
 var exec = require('gulp-exec');
+var jasmine = require('gulp-jasmine');
 
 
 gulp.task('test:e2e', function() {
@@ -61,21 +62,21 @@ gulp.task('sass', function() {
     .pipe(gulp.dest('./src/styles/css'));
 });
 
-// THIS NO WORK-Y
-// livereload server
-// gulp.task('connect', function() {
-//   connect.server({
-//     livereload: true
-//   });
-// });
-
-// watch JS and SCSS files for changes
+// watch SCSS files for changes and run jshint
 gulp.task('watch', function() {
   gulp.watch('**/*.scss', ['sass']);
   gulp.watch('./**/*.js', ['jshint']);
 });
 
+gulp.task('jasmine', function() {
+  gulp.src('./test/unit/assignment.spec.js')
+    .pipe(jasmine({
+      verbose: true
+    }));
+});
+
 gulp.task('default', [
+  'jasmine',
   'jshint',
   'sass',
   'test:e2e',

@@ -61,7 +61,6 @@ app.factory('MarketStatus', function() {
 
 // on load of webpage, load MarketCtrl
 app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
-    $scope.myStock = {};
 
     $scope.loadStocks = function() {
       $http.get('/stocks').success(function(response) {
@@ -72,9 +71,6 @@ app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
     // on refresh of single stock...
     $scope.refresh = function(stock, index) {
       $scope.index = index;
-
-      console.log(index);
-      console.log("refresh");
 
       // on success of GET of stocks
       $http.get('/stocks').success(function(stocks) {
@@ -87,7 +83,6 @@ app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
         $scope.stocks[$scope.index].tradeHistory.timestamps = stocks[$scope.index].tradeHistory.timestamps.map(function(timestamp) {
           return new Date(timestamp);
         });
-
 
         // chart.load = c3 (d3 helper) http://c3js.org/samples/data_load.html
         $scope.chart.load({
