@@ -108,18 +108,14 @@ app.get('/buy', function(req, res, next) {
 });
 
 app.get('/open', function(req, res) {
-
   myMarket.open();
-
   res.send(myMarket.isOpen);
 });
 
 app.get('/close', function(req, res) {
-
   myMarket.close();
-
   res.send(myMarket.isOpen);
-})
+});
 
 
 

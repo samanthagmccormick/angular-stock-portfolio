@@ -73,6 +73,7 @@ app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.refresh = function(stock, index) {
       $scope.index = index;
 
+console.log(index);
       console.log("refresh");
 
       // on success of GET of stocks
@@ -126,6 +127,8 @@ app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.chart = c3.generate($scope.chartConfig);
     // load stocks
     $scope.loadStocks();
+    // load chart with first stock's data
+    $scope.refresh(undefined, 0);
   }]) // end MarketCtrl
 
 app.controller('InvestorCtrl', [
@@ -227,7 +230,7 @@ app.controller('InvestorCtrl', [
         console.log('all good');
 
         // if the market is open, buy stock!
-        if (marketIsOpen) {
+        if ($scope.marketStatus === 'open') {
           // Buy stock! (use Market.buy() function)
           $http.get('/buy', {
               params: {
