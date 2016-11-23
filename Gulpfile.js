@@ -6,20 +6,27 @@ var sass = require('gulp-sass');
 var connect = require('gulp-connect');
 // allows you to set up tasks that run bash commands
 var exec = require('gulp-exec');
+var jasmine = require('gulp-jasmine');
 var karma = require('karma').server; // to include angular in jasmine tests
 
 
 
 gulp.task('test:e2e', function() {
+  // TODO
   //Run end to end test suite
 });
 
-gulp.task('test:unit', function() {
-  //Run unit test suite
+gulp.task('test:unit', function(done) {
+  karma.start({
+    configFile: __dirname + '/karma.config.js'
+  }, done);
 });
 
-gulp.task('build', function() {
-  //Compile and minify your src code into a dist folder
+gulp.task('jasmine', function() {
+  gulp.src('./test/unit/*.spec.js')
+    .pipe(jasmine({
+      verbose: true
+    }));
 });
 
 gulp.task('start:dev', function() {
@@ -33,10 +40,10 @@ gulp.task('start:dev', function() {
 gulp.task('start:market', function() {
   return gulp.src('./**/**')
     .pipe(exec('node server.dev.js tech rich'));
-
 });
 
 gulp.task('start:prod', function() {
+  // TODO
   //Configure your stock market backend via command line params and start your prod server
 });
 
@@ -59,8 +66,9 @@ gulp.task('sass', function() {
   gulp.src('./src/styles/sass/*.scss')
     // pass each scss file one by one into...
     .pipe(sass())
+
     // ...the destination file
-    .pipe(gulp.dest('./src/styles/css'));
+    .pipe(gulp.dest('./src/styles/css/'));
 });
 
 // watch SCSS files for changes and run jshint
@@ -69,19 +77,17 @@ gulp.task('watch', function() {
   gulp.watch('./**/*.js', ['jshint']);
 });
 
-gulp.task('jasmine', function() {
-  gulp.src('./test/unit/assignment.spec.js')
-    .pipe(jasmine({
-      verbose: true
-    }));
+gulp.task('minify', function() {
+  // TODO
 });
 
-gulp.task('default', [
+gulp.task('build', [
+  //Compile and minify your src code into a dist folder
   'jshint',
   'sass',
-  'test:e2e',
-  'test:unit',
-  'build',
+  // 'test:e2e',
+  // 'test:unit',
+  // 'minify',
   // 'connect',
   'watch'
 ]);

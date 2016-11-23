@@ -35,7 +35,7 @@ app.config([
     });
 
     // Handle incorrectly entered routes, i.e. redirect to "home" state
-    $urlRouterProvider.otherwise('market');
+    $urlRouterProvider.otherwise('investor');
   }
 ]);
 
@@ -52,7 +52,6 @@ app.factory('MarketStatus', function() {
         marketStatus = 'closed';
       }
 
-      console.log('marketStatus: ' + marketStatus);
       return marketStatus;
     }
   }
@@ -186,15 +185,17 @@ app.controller('InvestorCtrl', [
 
 
       $scope.buyStock = function(symbol, quantity) {
+        var stock;
+
         // Refresh stocks (to get latest quotes)
         $http.get('/stocks').success(function(response) {
           $scope.stocks = response;
         });
 
         // Find the right stock based on symbol
-        var stock = $scope.getStockBySymbol();
+        stock = $scope.getStockBySymbol(symbol);
 
-        if (!stock.isSymbolValid(symbol)) {
+        if ($scope.isSymbolInvalid(symbol)) {
           return;
         }
 
@@ -232,8 +233,6 @@ app.controller('InvestorCtrl', [
               }
             })
             .success(function(response) {
-              console.log("HTTP GET completed");
-              console.log(response);
 
               $scope.makeItRain();
 
@@ -264,16 +263,19 @@ app.controller('InvestorCtrl', [
         })[0];
       }
 
-      // $scope.isSymbolValid = function(symbol) {
-      //   // validate symbol
-      //   if (symbol === '' || symbol === undefined || $scope.getStockBySymbol(symbol) === undefined) {
-      //     $scope.errorMessage("symbol");
-      //   }
-      //   return;
-      // }
+      $scope.isSymbolInvalid = function(symbol) {
+        symbol = symbol.toUpperCase();
+        var isInvalid = false;
+        // validate symbol
+        if (symbol === '' || symbol === undefined || $scope.getStockBySymbol(symbol) === undefined) {
+          $scope.showErrorMessage("symbol");
+          isInvalid = true;
+        }
+        return isInvalid;
+      }
 
       // TODO move to view (should not be in controller)
-      $scope.errorMessage = function(item) {
+      $scope.showErrorMessage = function(item) {
         var message;
 
         switch (item) {
