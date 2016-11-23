@@ -3,6 +3,7 @@
 }());
 
 var express = require('express');
+var _ = require('underscore');
 var app = express();
 
 /* Basic building blocks for the stock market backend */
@@ -47,8 +48,6 @@ var createInvestors = function() {
 };
 
 
-
-
 // Initialize the app. (create stocks, create investors, create market with these stocks and investors)
 var stocks = createStocks();
 var investors = createInvestors();
@@ -57,7 +56,13 @@ var myMarket = new Market(stocks, investors);
 
 myMarket.open();
 
-console.log(stocks[0].quote());
+// Get a quote for each stock
+stocks.forEach(function(stock) {
+  stock.quote();
+});
+
+
+// console.log(stocks[0].quote());
 
 
 
@@ -98,9 +103,23 @@ app.get('/buy', function(req, res, next) {
 
   myMarket.buy(investorId, symbol, quoteId, quantity);
 
-  res.send('APP.GET completeddddd');
+  res.send('buy completed from app.get');
 
 });
+
+app.get('/open', function(req, res) {
+
+  myMarket.open();
+
+  res.send(myMarket.isOpen);
+});
+
+app.get('/close', function(req, res) {
+
+  myMarket.close();
+
+  res.send(myMarket.isOpen);
+})
 
 
 

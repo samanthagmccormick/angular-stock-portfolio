@@ -40,6 +40,25 @@ app.config([
   }
 ]);
 
+app.factory('MarketStatus', function() {
+  return {
+    getMarketStatus: function(response) {
+      console.log('market statusssss');
+      var marketStatus;
+      marketIsOpen = response;
+
+      if (marketIsOpen) {
+        marketStatus = 'open';
+      } else {
+        marketStatus = 'closed';
+      }
+
+      console.log('marketStatus: ' + marketStatus);
+      return marketStatus;
+    }
+  }
+});
+
 // on load of webpage, load MarketCtrl
 app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.myStock = {};
@@ -114,20 +133,12 @@ app.controller('InvestorCtrl', [
     '$http',
     '$filter',
     '_', // underscore
-    function($scope, $http, $filter, _) {
-      $scope.quotes = [];
-      $scope.count = 0;
+    'MarketStatus',
+    function($scope, $http, $filter, _, MarketStatus) {
+      $scope.transactionTotal = 0;
 
-      // check if market is open
-      var marketIsOpen;
       $http.get('/marketStatus').success(function(response) {
-        marketIsOpen = response;
-
-        if (marketIsOpen) {
-          $scope.marketStatus = 'Market is open';
-        } else {
-          $scope.marketStatus = 'Market is closed';
-        }
+        $scope.marketStatus = MarketStatus.getMarketStatus(response);
       });
 
       // Directives
@@ -165,18 +176,9 @@ app.controller('InvestorCtrl', [
             }
           })
           .success(function(response) {
-
-            $scope.quoteId = parseInt(response);
-
             // Refresh stocks (to get latest quotes)
             $http.get('/stocks').success(function(response) {
-
               $scope.stocks = response;
-
-              console.log("stocks refreshed");
-
-              console.log($scope.stocks[$scope.index].activeQuotes);
-
             });
 
           });
@@ -185,33 +187,39 @@ app.controller('InvestorCtrl', [
 
 
       $scope.buyStock = function(symbol, quantity) {
-        console.log($scope.stocks);
+        // Refresh stocks (to get latest quotes)
+        $http.get('/stocks').success(function(response) {
+          $scope.stocks = response;
+        });
 
         console.log('buyStock quantity: ' + quantity);
 
+        // Find the right stock based on symbol
         var stock = $filter('filter')($scope.stocks, {
           symbol: symbol
         })[0];
 
-        // check if symbol is valid
+        // validate symbol / stock
         if (symbol === '' || symbol === undefined || stock === undefined) {
           $scope.errorMessage("symbol");
           return;
         }
 
+        // check if quantity is valid
+        // TODO: check if quantity > stock.quantity = error
         var regExp = new RegExp(/^\d+(?:\.\d{1,2})?$/);
         if (quantity === '' || quantity <= 0) {
           $scope.errorMessage("quantity");
           return;
         }
 
-        // calculate total of transaction using active quote
-        var transactionTotal = stock.activeQuotes[$scope.quoteId] * quantity;
+        // calculate total of transaction using latest active quote
+        var quoteId = Object.keys(stock.activeQuotes).length - 1;
 
-        console.log(transactionTotal);
+        $scope.transactionTotal = stock.activeQuotes[quoteId] * quantity;
 
         // check if total $$ exceeds the investor's capital
-        if (transactionTotal > $scope.myInvestor.capital) {
+        if ($scope.transactionTotal > $scope.myInvestor.capital) {
           $scope.errorMessage("capital");
           return;
         }
@@ -225,13 +233,22 @@ app.controller('InvestorCtrl', [
               params: {
                 investorId: $scope.myInvestor.investorId,
                 symbol: symbol,
-                quoteId: $scope.quoteId,
+                quoteId: quoteId,
                 quantity: quantity
               }
             })
             .success(function(response) {
               console.log("HTTP GET completed");
               console.log(response);
+              // Refresh stocks (to get latest quotes)
+              $http.get('/stocks').success(function(response) {
+                $scope.stocks = response;
+              });
+
+              // Refresh investor info to display latest data
+              $http.get('/active-investor').success(function(response) {
+                $scope.myInvestor = response;
+              });
 
             });
         } else {
@@ -274,10 +291,54 @@ app.controller('InvestorCtrl', [
 
 app.controller('ManagerCtrl', [
   '$scope',
-  function($scope) {
+  '$http',
+  '$filter',
+  '_', // underscore
+  'MarketStatus',
+  function($scope, $http, $filter, _, MarketStatus) {
     $scope.test = 'ManagerCtrl Test';
 
-    console.log('ManagerCtrl!');
+    // get market status on load
+    $http.get('/marketStatus').success(function(response) {
+      $scope.marketStatus = MarketStatus.getMarketStatus(response);
+    });
 
+    $scope.open = function() {
+      var marketIsOpen;
+      $http.get('/marketStatus').success(function(response) {
+        marketIsOpen = response;
+
+        if (!marketIsOpen) {
+          $http.get('/open').success(function(response) {
+            console.log('success: Market has been opened');
+            $scope.marketStatus = MarketStatus.getMarketStatus(response);
+
+          });
+        } else {
+          // TODO: use errorMessage (make into factory)
+          console.log("market is already open, duh");
+        }
+
+      });
+    }
+
+    $scope.close = function() {
+      var marketIsOpen;
+      $http.get('/marketStatus').success(function(response) {
+        marketIsOpen = response;
+
+        if (marketIsOpen) {
+          $http.get('/close').success(function(response) {
+            console.log('success: Market has been closed');
+            $scope.marketStatus = MarketStatus.getMarketStatus(response);
+
+          });
+        } else {
+          // TODO: use errorMessage (make into factory)
+          console.log("market is already closed, duh");
+        }
+
+      });
+    }
   }
 ]); // end ManagerCtrl

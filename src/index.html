@@ -56,13 +56,13 @@
         <strong>make it rain.</strong>
       </p>
 
-      <div>{{marketStatus}}</div>
+      <div>Market is {{marketStatus}}</div>
 
       <h3>Get a Quote</h3>
       <div ng-repeat="stock in stocks" ng-submit="getQuote($index)">
         <form>
           <span>{{stock.symbol}}</span>
-          <button type="submit">Get Quote</button>
+          <button type="submit">Get New Quote</button>
           <span ng-repeat="quote in stock.activeQuotes" ng-if="$last">Total: {{quote | currency}}</span>
         </form>
       </div>
@@ -77,8 +77,12 @@
       <div class="errorMessage">{{errorMessage}}</div>
 
 
-      <div ng-repeat="transaction in transactions">
-        {{transaction}}
+    <div>Total Charged: {{transactionTotal | currency}}</div>
+
+    <h5>Transaction History</h5>
+
+      <div ng-repeat="transaction in myInvestor.transactions | orderBy : 'transaction.timestamp'">
+        {{transaction.timestamp | date : "M/d/yy h:mm:ss a" }} Bought {{transaction.quantity}} shares of  {{transaction.symbol}} at {{transaction.transactionTotal}}
       </div>
 
 
@@ -89,7 +93,14 @@
 
     <!-- Manager route -->
     <script type="text/ng-template" id="/manager.html">
-      {{test}}
+      <div>Market is {{marketStatus}}</div>
+
+        <button ng-click="open()">Open Market</button>
+
+        <button ng-click="close()">Close Market</button>
+
+
+
     </script>
 
 
