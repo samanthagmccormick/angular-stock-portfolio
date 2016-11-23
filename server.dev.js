@@ -10,6 +10,7 @@ var app = express();
 var Stock = require('./lib/stock');
 var Investor = require('./lib/investor');
 var Market = require('./lib/market');
+var GifGenerator = require('./lib/gifgenerator');
 
 /* Gather input from node command line params */
 var stockType = process.argv[2];
@@ -51,6 +52,7 @@ var createInvestors = function() {
 // Initialize the app. (create stocks, create investors, create market with these stocks and investors)
 var stocks = createStocks();
 var investors = createInvestors();
+var gifGenerator = new GifGenerator();
 // Market(stocks, investors)
 var myMarket = new Market(stocks, investors);
 
@@ -142,6 +144,21 @@ app.get('/volatilityPercent', function(req, res) {
   stocks[symbolIndex].setVolatilityPercent(volatilityPercent);
 
   res.send(volatilityPercent);
+});
+
+app.get('/make-it-rain', function(req, res) {
+  var makeitrainArray = [
+    'weezy.gif',
+    'lemon.gif',
+    'dolla.gif',
+    'suitguy.gif',
+    'unicorn.gif',
+    'kim.gif'
+  ];
+
+  var gif = gifGenerator.generateRandomGif(makeitrainArray);
+
+  res.send(gif);
 });
 
 /* Starting the Express.js server instance */

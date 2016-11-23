@@ -4,7 +4,7 @@
 
 var underscore = angular.module('underscore', []);
 underscore.factory('_', function() {
-  return window._; //Underscore should be loaded on the page
+  return window._;
 });
 
 var app = angular.module('app', ['ui.router', 'underscore']);
@@ -139,15 +139,19 @@ app.controller('InvestorCtrl', [
         $scope.marketStatus = MarketStatus.getMarketStatus(response);
       });
 
+      $scope.makeItRain = function() {
+
+        $http.get('/make-it-rain').success(function(response) {
+          $scope.makeItRainGif = response;
+        });
+      }
+
       // Directives
       $scope.loadInvestor = function() {
         $scope.myInvestor = {};
 
         // on success of GET of investors[0] endpoint
         $http.get('/active-investor').success(function(response) {
-          console.log('investor...');
-          // console.log(response);
-
           $scope.myInvestor = response;
         });
       }
@@ -164,8 +168,6 @@ app.controller('InvestorCtrl', [
 
       $scope.getQuote = function(index) {
         $scope.index = index;
-
-        console.log($scope.index);
 
         // get active quoteId of stock
         $http.get('/quote', {
@@ -222,7 +224,8 @@ app.controller('InvestorCtrl', [
           return;
         }
 
-        console.log('all good');
+        // Reset error message
+        $scope.errorMessage = '';
 
         // if the market is open, buy stock!
         if ($scope.marketStatus === 'open') {
@@ -238,6 +241,9 @@ app.controller('InvestorCtrl', [
             .success(function(response) {
               console.log("HTTP GET completed");
               console.log(response);
+
+              $scope.makeItRain();
+
               // Refresh stocks (to get latest quotes)
               $http.get('/stocks').success(function(response) {
                 $scope.stocks = response;
@@ -302,8 +308,18 @@ app.controller('ManagerCtrl', [
     });
 
     // get market status on load
-    $http.get('/marketStatus').success(function(response) {
-      $scope.marketStatus = MarketStatus.getMarketStatus(response);
+    $http.get('/marketStatus').success(function(isOpen) {
+      $scope.marketStatus = MarketStatus.getMarketStatus(isOpen);
+
+      // TODO make factory since this is duplicated below
+      if (isOpen) {
+        $scope.marketIconColor = 'green';
+        $scope.marketIconName = 'clock-o';
+      } else {
+        $scope.marketIconColor = 'red';
+        $scope.marketIconName = 'ban';
+      }
+
     });
 
     $scope.open = function() {
@@ -315,6 +331,9 @@ app.controller('ManagerCtrl', [
           $http.get('/open').success(function(response) {
             console.log('success: Market has been opened');
             $scope.marketStatus = MarketStatus.getMarketStatus(response);
+
+            $scope.marketIconColor = 'green';
+            $scope.marketIconName = 'clock-o';
 
           });
         } else {
@@ -334,6 +353,9 @@ app.controller('ManagerCtrl', [
           $http.get('/close').success(function(response) {
             console.log('success: Market has been closed');
             $scope.marketStatus = MarketStatus.getMarketStatus(response);
+
+            $scope.marketIconColor = 'red';
+            $scope.marketIconName = 'ban';
 
           });
         } else {

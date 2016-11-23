@@ -1,7 +1,7 @@
 body {
   background: #E4E8EA;
-  font-family: helvetica;
   text-align: center;
+  font-size: 12px; // base font size
 }
 
 a {
@@ -10,5 +10,35 @@ a {
 }
 
 .errorMessage {
-  color: red;
+  color: $red;
 }
+
+.marketStatus {
+  font-family: $font;
+  font-size: .8em;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 50%;
+  height: 30%;
+  margin: auto;
+}
+
+.main {
+  font-family: $font;
+  font-size: 1.05em;
+}
+
+.bold {
+  font-weight: 600;
+}
+
+.green {
+  color: $green;
+}
+
+.red {
+  color: $red;
+}
+

@@ -10,8 +10,11 @@
     <link rel="stylesheet" href="c3/c3.min.css" />
     <link rel="stylesheet" href="/styles/css/base.css" type="text/css" media="screen">
     <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" type="text/css" media="screen">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css" media="screen">
 
-    <!-- JS (TODO: compile/minify into 1 file) -->
+
+    <!-- JS Resources (TODO: compile/minify into 1 file) -->
     <script src="jquery/dist/jquery.min.js"></script>
     <script src="underscore/underscore.js"></script>
     <script src="angular/angular.min.js"></script>
@@ -21,21 +24,25 @@
     <script src="ng-polymer-elements/ng-polymer-elements.min.js"></script>
     <script src="bootstrap/dist/js/bootstrap.min.js"></script>
 
+    <!-- Icons -->
+    <!-- These SUCK, remove later! -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- JS files-->
     <script src="app.js" type="text/javascript"></script>
   </head>
 
   <body ng-app="app">
 
     <menu>
-      <a href="#/market">Market</a>
-      <a href="#/investor">Investor</a>
-      <a href="#/manager">Manager</a>
+      <ol class="breadcrumb">
+        <li><a href="#/market">Market</a></li>
+        <li><a href="#/investor">Investor</a></li>
+        <li><a href="#/manager">Manager</a></li>
+      </ol>
     </menu>
 
-    <!-- this is where the route below goes-->
-    <ui-view></ui-view>
+    <!-- this is where the routes below appear-->
+    <ui-view class="main"></ui-view>
 
     <!-- Market route -->
     <script type="text/ng-template" id="/market.html">
@@ -54,16 +61,16 @@
     <script type="text/ng-template" id="/investor.html">
       <h1>Hello {{myInvestor.name}}.</h1>
       <p>You have {{myInvestor.capital | currency}} remaining to
-        <strong>make it rain.</strong>
+        <span class="bold">make it rain.</span>
       </p>
 
       <div>Market is {{marketStatus}}</div>
 
       <h3>Get a Quote</h3>
-      <div ng-repeat="stock in stocks" ng-submit="getQuote($index)">
+      <div ng-repeat="stock in stocks">
         <form>
           <span>{{stock.symbol}}</span>
-          <button type="submit">Get New Quote</button>
+          <i type="submit" ng-click="getQuote($index)" class="material-icons">autorenew</i>
           <span ng-repeat="quote in stock.activeQuotes" ng-if="$last">Total: {{quote | currency}}</span>
         </form>
       </div>
@@ -77,13 +84,14 @@
       </form>
       <div class="errorMessage">{{errorMessage}}</div>
 
+      <div>Total Charged: {{transactionTotal | currency}}</div>
 
-    <div>Total Charged: {{transactionTotal | currency}}</div>
+      <img src="./images/{{makeItRainGif}}" class="gif" />
 
-    <h3>Transaction History</h3>
+      <h3>Transaction History</h3>
 
       <div ng-repeat="transaction in myInvestor.transactions | orderBy : 'transaction.timestamp'">
-        {{transaction.timestamp | date : "M/d/yy h:mm:ss a" }} Bought {{transaction.quantity}} shares of  {{transaction.symbol}} at {{transaction.transactionTotal}}
+        {{transaction.timestamp | date : "M/d/yy h:mm:ss a" }} Bought {{transaction.quantity}} shares of {{transaction.symbol}} at {{transaction.transactionTotal}}
       </div>
 
 
@@ -94,38 +102,40 @@
 
     <!-- Manager route -->
     <script type="text/ng-template" id="/manager.html">
-      <div>Market is {{marketStatus}}</div>
+      <div>
+        <i class="fa fa-3x fa-{{marketIconName}} {{marketIconColor}}"><span class="marketStatus">  Market is {{marketStatus}}</span></i>
+      </div>
 
-        <h3>Open/Close the Market</h3>
+      <h3>Open/Close the Market</h3>
 
 
-        <button ng-click="open()">Open Market</button>
-        <button ng-click="close()">Close Market</button>
+      <button ng-click="open()">Open Market</button>
+      <button ng-click="close()">Close Market</button>
 
-        <h3>Edit Stocks</h3>
+      <h3>Edit Stocks</h3>
 
       <div ng-repeat="stock in stocks">
-          <div>{{stock.symbol}}</div>
-          <div>
-              <form ng-submit="changeGrowthRate(stock, growthRate, $index)">
-                  <input type="text" ng-model="growthRate" placeholder="Growth Rate"></input>
-                  <button type="submit">Change</button>
-                  {{stock.growthRate}}
-              </form>
+        <div>{{stock.symbol}}</div>
+        <div>
+          <form ng-submit="changeGrowthRate(stock, growthRate, $index)">
+            <input type="text" ng-model="growthRate" placeholder="Growth Rate"></input>
+            <button type="submit">Change</button>
+            {{stock.growthRate}}
+          </form>
         </div>
-          <div>
-              <form ng-submit="changeChangeInterval(stock, changeInterval, $index)">
-                  <input type="text" ng-model="changeInterval" placeholder="Change Interval"></input>
-                  <button type="submit">Change</button>
-                {{stock.changeInterval}}
-              </form>
+        <div>
+          <form ng-submit="changeChangeInterval(stock, changeInterval, $index)">
+            <input type="text" ng-model="changeInterval" placeholder="Change Interval"></input>
+            <button type="submit">Change</button>
+            {{stock.changeInterval}}
+          </form>
         </div>
-          <div>
-              <form ng-submit="changeVolatilityPercent(stock, volatilityPercent, $index)">
-                  <input type="text" ng-model="volatilityPercent" placeholder="Volatility Percent"></input>
-                  <button type="submit">Change</button>
-                  {{stock.volatilityPercent}}
-              </form>
+        <div>
+          <form ng-submit="changeVolatilityPercent(stock, volatilityPercent, $index)">
+            <input type="text" ng-model="volatilityPercent" placeholder="Volatility Percent"></input>
+            <button type="submit">Change</button>
+            {{stock.volatilityPercent}}
+          </form>
         </div>
       </div>
 
