@@ -117,7 +117,32 @@ app.get('/close', function(req, res) {
   res.send(myMarket.isOpen);
 });
 
+app.get('/growthRate', function(req, res) {
+  var symbolIndex = req.query.symbolIndex;
+  var growthRate = req.query.growthRate;
 
+  stocks[symbolIndex].setGrowthRate(growthRate);
+
+  res.send(growthRate);
+});
+
+app.get('/changeInterval', function(req, res) {
+  var symbolIndex = req.query.symbolIndex;
+  var changeInterval = req.query.changeInterval;
+
+  stocks[symbolIndex].setChangeInterval(changeInterval);
+
+  res.send(changeInterval);
+});
+
+app.get('/volatilityPercent', function(req, res) {
+  var symbolIndex = req.query.symbolIndex;
+  var volatilityPercent = req.query.volatilityPercent;
+
+  stocks[symbolIndex].setVolatilityPercent(volatilityPercent);
+
+  res.send(volatilityPercent);
+});
 
 /* Starting the Express.js server instance */
 app.use(express.static('src'));

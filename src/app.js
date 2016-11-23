@@ -73,7 +73,7 @@ app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.refresh = function(stock, index) {
       $scope.index = index;
 
-console.log(index);
+      console.log(index);
       console.log("refresh");
 
       // on success of GET of stocks
@@ -301,6 +301,11 @@ app.controller('ManagerCtrl', [
   function($scope, $http, $filter, _, MarketStatus) {
     $scope.test = 'ManagerCtrl Test';
 
+    // Refresh stocks (to get latest quotes)
+    $http.get('/stocks').success(function(response) {
+      $scope.stocks = response;
+    });
+
     // get market status on load
     $http.get('/marketStatus').success(function(response) {
       $scope.marketStatus = MarketStatus.getMarketStatus(response);
@@ -340,8 +345,66 @@ app.controller('ManagerCtrl', [
           // TODO: use errorMessage (make into factory)
           console.log("market is already closed, duh");
         }
-
       });
     }
+
+    // todo grab growthRate from input.
+    $scope.changeGrowthRate = function(stock, growthRate, index) {
+      $scope.index = index;
+
+      $http.get('/growthRate', {
+          params: {
+            symbolIndex: $scope.index,
+            growthRate: growthRate
+          }
+        })
+        .success(function(response) {
+          // Refresh stocks (to get latest quotes)
+          $http.get('/stocks').success(function(response) {
+            $scope.stocks = response;
+          });
+
+        });
+    }
+
+    $scope.changeChangeInterval = function(stock, changeInterval, index) {
+      console.log('blah');
+      $scope.index = index;
+
+      $http.get('/changeInterval', {
+          params: {
+            symbolIndex: $scope.index,
+            changeInterval: changeInterval
+          }
+        })
+        .success(function(response) {
+          // Refresh stocks (to get latest quotes)
+          $http.get('/stocks').success(function(response) {
+            $scope.stocks = response;
+          });
+
+        });
+    }
+
+    $scope.changeVolatilityPercent = function(stock, volatilityPercent, index) {
+      $scope.index = index;
+
+      $http.get('/volatilityPercent', {
+          params: {
+            symbolIndex: $scope.index,
+            volatilityPercent: volatilityPercent
+          }
+        })
+        .success(function(response) {
+          // Refresh stocks (to get latest quotes)
+          $http.get('/stocks').success(function(response) {
+            $scope.stocks = response;
+          });
+
+        });
+    }
+
+
+
   }
 ]); // end ManagerCtrl

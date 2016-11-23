@@ -79,7 +79,7 @@
 
     <div>Total Charged: {{transactionTotal | currency}}</div>
 
-    <h5>Transaction History</h5>
+    <h3>Transaction History</h3>
 
       <div ng-repeat="transaction in myInvestor.transactions | orderBy : 'transaction.timestamp'">
         {{transaction.timestamp | date : "M/d/yy h:mm:ss a" }} Bought {{transaction.quantity}} shares of  {{transaction.symbol}} at {{transaction.transactionTotal}}
@@ -96,8 +96,34 @@
       <div>Market is {{marketStatus}}</div>
 
         <button ng-click="open()">Open Market</button>
-
         <button ng-click="close()">Close Market</button>
+
+        <h3>Edit Stocks</h3>
+
+      <div ng-repeat="stock in stocks">
+          <div>{{stock.symbol}}</div>
+          <div>
+              <form ng-submit="changeGrowthRate(stock, growthRate, $index)">
+                  <input type="text" ng-model="growthRate" placeholder="Growth Rate"></input>
+                  <button type="submit">Change</button>
+                  {{stock.growthRate}}
+              </form>
+        </div>
+          <div>
+              <form ng-submit="changeChangeInterval(stock, changeInterval, $index)">
+                  <input type="text" ng-model="changeInterval" placeholder="Change Interval"></input>
+                  <button type="submit">Change</button>
+                {{stock.changeInterval}}
+              </form>
+        </div>
+          <div>
+              <form ng-submit="changeVolatilityPercent(stock, volatilityPercent, $index)">
+                  <input type="text" ng-model="volatilityPercent" placeholder="Volatility Percent"></input>
+                  <button type="submit">Change</button>
+                  {{stock.volatilityPercent}}
+              </form>
+        </div>
+      </div>
 
 
 
