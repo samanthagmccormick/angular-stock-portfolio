@@ -85,11 +85,10 @@ gulp.task('minify', function() {
 gulp.task('build', [
   //Compile and minify your src code into a dist folder
   'jshint',
-  'sass',
+  'sass'
   // 'test:e2e',
   // 'test:unit',
   // 'minify',
   // 'connect',
-  'watch'
 ]);
 
