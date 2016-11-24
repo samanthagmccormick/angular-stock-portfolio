@@ -34,31 +34,54 @@ app.config([
       controller: 'ManagerCtrl'
     });
 
-    // Handle incorrectly entered routes, i.e. redirect to "home" state
+    // Default route is...
     $urlRouterProvider.otherwise('investor');
   }
 ]);
 
 app.factory('MarketStatus', function() {
   return {
-    getMarketStatus: function(response) {
-      console.log('market statusssss');
-      var marketStatus;
-      marketIsOpen = response;
+    getMarketStatus: function(marketIsOpen) {
+      return marketIsOpen ? 'open' : 'closed';
+    },
+    getMarketIcon: function(marketIsOpen) {
+      return marketIsOpen ? 'fa-clock-o green' : 'fa-ban red';
+    }
+  }
+});
 
-      if (marketIsOpen) {
-        marketStatus = 'open';
-      } else {
-        marketStatus = 'closed';
+// TODO: Should this messaging be moved to the view instead?
+app.factory('ErrorMessage', function() {
+  return {
+    getErrorMessage: function(item) {
+      var message;
+
+      switch (item) {
+        case 'symbol':
+        case 'quantity':
+        case 'growth rate':
+        case 'volatility percent':
+        case 'change interval':
+          message = 'Sorry, you did not enter a valid ' + item + '. Please try again.';
+          break;
+        case 'capital':
+          message = 'Sorry, you do not have enough ' + item + ' to make this transaction.';
+          break;
+        case 'closed':
+          message = 'The market is closed. Your transaction did not go through.';
+          break;
+        default:
+          message = 'Oops, application error...no message found.';
       }
 
-      return marketStatus;
+      return message;
     }
   }
 });
 
 // on load of webpage, load MarketCtrl
 app.controller('MarketCtrl', ['$scope', '$http', function($scope, $http) {
+    $scope.errorMessage = '';
 
     $scope.loadStocks = function() {
       $http.get('/stocks').success(function(response) {
@@ -130,8 +153,10 @@ app.controller('InvestorCtrl', [
     '$filter',
     '_', // underscore
     'MarketStatus',
-    function($scope, $http, $filter, _, MarketStatus) {
+    'ErrorMessage',
+    function($scope, $http, $filter, _, MarketStatus, ErrorMessage) {
       $scope.transactionTotal = 0;
+      $scope.errorMessage = '';
 
       $http.get('/marketStatus').success(function(response) {
         $scope.marketStatus = MarketStatus.getMarketStatus(response);
@@ -157,9 +182,6 @@ app.controller('InvestorCtrl', [
       $scope.loadStocks = function() {
         // on success of GET of investors[0] endpoint
         $http.get('/stocks').success(function(response) {
-          console.log('stocks...');
-          // console.log(response);
-
           $scope.stocks = response;
         });
       }
@@ -200,10 +222,9 @@ app.controller('InvestorCtrl', [
         }
 
         // check if quantity is valid
-        // TODO: check if quantity > stock.quantity = error
         var regExp = new RegExp(/^\d+(?:\.\d{1,2})?$/);
         if (quantity === '' || quantity <= 0) {
-          $scope.errorMessage("quantity");
+          $scope.errorMessage = ErrorMessage.getErrorMessage("quantity");
           return;
         }
 
@@ -214,7 +235,7 @@ app.controller('InvestorCtrl', [
 
         // check if total $$ exceeds the investor's capital
         if ($scope.transactionTotal > $scope.myInvestor.capital) {
-          $scope.errorMessage("capital");
+          $scope.errorMessage = ErrorMessage.getErrorMessage("capital");
           return;
         }
 
@@ -248,7 +269,7 @@ app.controller('InvestorCtrl', [
 
             });
         } else {
-          $scope.errorMessage("closed");
+          $scope.errorMessage = ErrorMessage.getErrorMessage("closed");
         }
 
         // refresh stocks because quantity is now updated
@@ -268,32 +289,10 @@ app.controller('InvestorCtrl', [
         var isInvalid = false;
         // validate symbol
         if (symbol === '' || symbol === undefined || $scope.getStockBySymbol(symbol) === undefined) {
-          $scope.showErrorMessage("symbol");
+          $scope.errorMessage = ErrorMessage.getErrorMessage("symbol");
           isInvalid = true;
         }
         return isInvalid;
-      }
-
-      // TODO move to view (should not be in controller)
-      $scope.showErrorMessage = function(item) {
-        var message;
-
-        switch (item) {
-          case 'symbol':
-          case 'quantity':
-            message = 'Sorry, you did not enter a valid ' + item + '. Please try again.';
-            break;
-          case 'capital':
-            message = 'Sorry, you do not have enough ' + item + ' to make this transaction.';
-            break;
-          case 'closed':
-            message = 'The market is closed. Your transaction did not go through.';
-            break;
-          default:
-            message = 'Oops, application error...no message found.';
-        }
-
-        $scope.errorMessage = message;
       }
 
       $scope.loadInvestor();
@@ -309,8 +308,10 @@ app.controller('ManagerCtrl', [
   '$filter',
   '_', // underscore
   'MarketStatus',
-  function($scope, $http, $filter, _, MarketStatus) {
+  'ErrorMessage',
+  function($scope, $http, $filter, _, MarketStatus, ErrorMessage) {
     $scope.test = 'ManagerCtrl Test';
+    $scope.errorMessage = '';
 
     // Refresh stocks (to get latest quotes)
     $http.get('/stocks').success(function(response) {
@@ -320,16 +321,7 @@ app.controller('ManagerCtrl', [
     // get market status on load
     $http.get('/marketStatus').success(function(isOpen) {
       $scope.marketStatus = MarketStatus.getMarketStatus(isOpen);
-
-      // TODO make factory since this is duplicated below
-      if (isOpen) {
-        $scope.marketIconColor = 'green';
-        $scope.marketIconName = 'clock-o';
-      } else {
-        $scope.marketIconColor = 'red';
-        $scope.marketIconName = 'ban';
-      }
-
+      $scope.marketIcon = MarketStatus.getMarketIcon(isOpen);
     });
 
     $scope.open = function() {
@@ -339,16 +331,9 @@ app.controller('ManagerCtrl', [
 
         if (!marketIsOpen) {
           $http.get('/open').success(function(response) {
-            console.log('success: Market has been opened');
             $scope.marketStatus = MarketStatus.getMarketStatus(response);
-
-            $scope.marketIconColor = 'green';
-            $scope.marketIconName = 'clock-o';
-
+            $scope.marketIcon = MarketStatus.getMarketIcon(response);
           });
-        } else {
-          // TODO: use errorMessage (make into factory)
-          console.log("market is already open, duh");
         }
 
       });
@@ -361,16 +346,9 @@ app.controller('ManagerCtrl', [
 
         if (marketIsOpen) {
           $http.get('/close').success(function(response) {
-            console.log('success: Market has been closed');
             $scope.marketStatus = MarketStatus.getMarketStatus(response);
-
-            $scope.marketIconColor = 'red';
-            $scope.marketIconName = 'ban';
-
+            $scope.marketIcon = MarketStatus.getMarketIcon(response);
           });
-        } else {
-          // TODO: use errorMessage (make into factory)
-          console.log("market is already closed, duh");
         }
       });
     }
@@ -378,6 +356,14 @@ app.controller('ManagerCtrl', [
     // todo grab growthRate from input.
     $scope.changeGrowthRate = function(stock, growthRate, index) {
       $scope.index = index;
+
+      if (!growthRate) {
+        $scope.errorMessage = ErrorMessage.getErrorMessage("growth rate");
+        return;
+      }
+
+      // Reset error message
+      $scope.errorMessage = '';
 
       $http.get('/growthRate', {
           params: {
@@ -395,8 +381,15 @@ app.controller('ManagerCtrl', [
     }
 
     $scope.changeChangeInterval = function(stock, changeInterval, index) {
-      console.log('blah');
       $scope.index = index;
+
+      if (!changeInterval) {
+        $scope.errorMessage = ErrorMessage.getErrorMessage("change interval");
+        return;
+      }
+
+      // Reset error message
+      $scope.errorMessage = '';
 
       $http.get('/changeInterval', {
           params: {
@@ -415,6 +408,14 @@ app.controller('ManagerCtrl', [
 
     $scope.changeVolatilityPercent = function(stock, volatilityPercent, index) {
       $scope.index = index;
+
+      if (!volatilityPercent) {
+        $scope.errorMessage = ErrorMessage.getErrorMessage("volatility percent");
+        return;
+      }
+
+      // Reset error message
+      $scope.errorMessage = '';
 
       $http.get('/volatilityPercent', {
           params: {

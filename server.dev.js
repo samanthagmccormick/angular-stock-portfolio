@@ -64,10 +64,6 @@ stocks.forEach(function(stock) {
 });
 
 
-// console.log(stocks[0].quote());
-
-
-
 /* Example routes - add your own routes to interact with your stock market */
 
 // on visit of localhost:3000/stocks
@@ -90,12 +86,9 @@ app.get('/quote', function(req, res, next) {
 
   var symbolIndex = req.query.symbolIndex;
 
-  console.log(stocks[symbolIndex].quote());
-
   res.send(stocks[symbolIndex].quote().toString());
 });
 
-// Market.prototype.buy = function(investorId, symbol, quoteId, quantity) {
 app.get('/buy', function(req, res, next) {
 
   var investorId = req.query.investorId;
@@ -106,7 +99,6 @@ app.get('/buy', function(req, res, next) {
   myMarket.buy(investorId, symbol, quoteId, quantity);
 
   res.send('buy completed from app.get');
-
 });
 
 app.get('/open', function(req, res) {

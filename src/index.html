@@ -99,7 +99,7 @@
     <!-- Manager route -->
     <script type="text/ng-template" id="/manager.html">
       <div>
-        <i class="fa fa-3x fa-{{marketIconName}} {{marketIconColor}}"><span class="marketStatus">  Market is {{marketStatus}}</span></i>
+        <i class="fa fa-3x {{marketIcon}}"><span class="marketStatus">  Market is {{marketStatus}}</span></i>
       </div>
 
       <h3>Open/Close the Market</h3>
@@ -134,6 +134,8 @@
           </form>
         </div>
       </div>
+
+      <div class="red">{{errorMessage}}</div>
 
 
 
