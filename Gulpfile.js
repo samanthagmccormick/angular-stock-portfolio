@@ -38,8 +38,9 @@ gulp.task('start:dev', function() {
 
 // FIXME
 gulp.task('start:market', function() {
+  // i.e. "npm start:market tech rich"
   return gulp.src('./**/**')
-    .pipe(exec('node server.dev.js tech rich'));
+    .pipe(exec('node server.dev.js ' + process.argv[3] + process.argv[4]));
 });
 
 gulp.task('start:prod', function() {
