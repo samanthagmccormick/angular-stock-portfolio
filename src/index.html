@@ -28,6 +28,7 @@
   </head>
 
   <body ng-app="app">
+    <div class="container">
 
     <menu>
       <ol class="breadcrumb">
@@ -43,7 +44,7 @@
     <!-- Market route -->
     <script type="text/ng-template" id="/market.html">
 
-      <div ng-repeat="myStock in stocks">
+      <div class="row-margin" ng-repeat="myStock in stocks">
         {{myStock.symbol}} {{myStock.price | currency}} {{myStock.quantity}} {{myStock.timestamps}}
         <a ng-click="refresh(stock, $index)">Refresh</a>
       </div>
@@ -60,13 +61,11 @@
         <span class="bold">make it rain.</span>
       </p>
 
-      <div>Market is {{marketStatus}}</div>
-
       <h3>Get a Quote</h3>
-      <div ng-repeat="stock in stocks">
+      <div class="row-margin" ng-repeat="stock in stocks">
         <form>
           <span>{{stock.symbol}}</span>
-          <i type="submit" ng-click="getQuote($index)" class="material-icons">autorenew</i>
+          <i class="fa fa-refresh fa-2x green" ng-click="getQuote($index)"></i>
           <span ng-repeat="quote in stock.activeQuotes" ng-if="$last">Total: {{quote | currency}}</span>
         </form>
       </div>
@@ -76,7 +75,7 @@
       <form ng-submit="buyStock(symbol, amount)">
         <input type="text" ng-model="symbol" placeholder="Stock ticker"></input>
         <input type="number" ng-model="amount" placeholder="quantity"></input>
-        <button type="submit">Buy</button>
+        <button class="btn btn-info" type="submit">Buy</button>
       </form>
       <div class="red">{{errorMessage}}</div>
 
@@ -105,34 +104,36 @@
       <h3>Open/Close the Market</h3>
 
 
-      <button ng-click="open()">Open Market</button>
-      <button ng-click="close()">Close Market</button>
+      <button class="btn btn-success" ng-click="open()">Open Market</button>
+      <button class="btn btn-danger" ng-click="close()">Close Market</button>
 
       <h3>Edit Stocks</h3>
 
       <div ng-repeat="stock in stocks">
-        <div>{{stock.symbol}}</div>
-        <div>
-          <form ng-submit="changeGrowthRate(stock, growthRate, $index)">
-            <input type="text" ng-model="growthRate" placeholder="Growth Rate"></input>
-            <button type="submit">Change</button>
-            {{stock.growthRate}}
-          </form>
-        </div>
-        <div>
-          <form ng-submit="changeChangeInterval(stock, changeInterval, $index)">
-            <input type="text" ng-model="changeInterval" placeholder="Change Interval"></input>
-            <button type="submit">Change</button>
-            {{stock.changeInterval}}
-          </form>
-        </div>
-        <div>
-          <form ng-submit="changeVolatilityPercent(stock, volatilityPercent, $index)">
-            <input type="text" ng-model="volatilityPercent" placeholder="Volatility Percent"></input>
-            <button type="submit">Change</button>
-            {{stock.volatilityPercent}}
-          </form>
-        </div>
+            <div>{{stock.symbol}}</div>
+            <div class="row-margin">
+              <form ng-submit="changeGrowthRate(stock, growthRate, $index)">
+                <input type="text" ng-model="growthRate" placeholder="Growth Rate"></input>
+                <button class="btn btn-info" class="btn btn-info" type="submit">Change</button>
+                {{stock.growthRate}}
+              </form>
+            </div>
+
+            <div class="row-margin">
+              <form ng-submit="changeChangeInterval(stock, changeInterval, $index)">
+                <input type="text" ng-model="changeInterval" placeholder="Change Interval"></input>
+                <button class="btn btn-info" type="submit">Change</button>
+                {{stock.changeInterval}}
+              </form>
+            </div>
+
+            <divclass="row-margin">
+              <form ng-submit="changeVolatilityPercent(stock, volatilityPercent, $index)">
+                <input type="text" ng-model="volatilityPercent" placeholder="Volatility Percent"></input>
+                <button class="btn btn-info"  type="submit">Change</button>
+                {{stock.volatilityPercent}}
+              </form>
+            </div>
       </div>
 
       <div class="red">{{errorMessage}}</div>
@@ -143,7 +144,7 @@
 
 
 
-
+        </div>
   </body>
 
 </html>

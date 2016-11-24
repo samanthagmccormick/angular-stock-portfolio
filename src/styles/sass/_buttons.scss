@@ -1,3 +1,17 @@
+.breathing-room {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
 .submit {
   color: green;
+}
+
+.fa {
+  cursor: pointer;
+  @extend .breathing-room;
+}
+
+.fa-refresh {
+  @extend .breathing-room;
 }
